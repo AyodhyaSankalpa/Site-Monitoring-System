@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
-@section('title', 'Agency Dashboard')
+@section('title', 'Dashboard')
 
 @section('content')
 
     <!-- Top Headline & Action Bar -->
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <div>
-            <h1 class="h3 fw-bold mb-1 text-dark">Client Websites Health Monitor</h1>
-            <p class="text-muted mb-0 small">Real-time uptime, SSL certificate validation & domain expiration tracking for web agency clients.</p>
+            <h1 class="h3 fw-bold mb-1 text-dark">Websites Health Monitor</h1>
+            <p class="text-muted mb-0 small">Real-time uptime, SSL certificate validation & domain expiration tracking for websites.</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('sites.create') }}" class="btn btn-primary shadow-sm">

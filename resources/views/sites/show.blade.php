@@ -60,7 +60,7 @@
                     <span class="fw-bold text-dark small text-uppercase">
                         <i class="bi bi-activity text-primary me-2"></i> HTTP Health
                     </span>
-                    <span class="badge bg-light text-secondary border">Anti-Cache</span>
+                    <span class="badge bg-light text-secondary border">Live Ping</span>
                 </div>
                 <div class="card-body p-3">
                     <ul class="list-unstyled mb-0 small">

@@ -88,7 +88,7 @@ class SiteCheckerService
             CURLOPT_MAXREDIRS => 5,
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => 0,
-            CURLOPT_USERAGENT => 'SitePulseMonitor/1.0 (+https://agency.example.com)',
+            CURLOPT_USERAGENT => 'SitePulseMonitor/1.0 (+https://example.com)',
             CURLOPT_HTTPHEADER => [
                 'Cache-Control: no-cache, no-store, must-revalidate',
                 'Pragma: no-cache',

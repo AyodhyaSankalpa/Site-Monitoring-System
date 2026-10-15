@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Site Pulse Monitor') - Agency Monitoring System</title>
+    <title>@yield('title', 'Site Pulse Monitor') - Site Monitoring System</title>
 
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -153,7 +153,7 @@
                 <span class="d-inline-flex align-items-center justify-content-center bg-primary text-white rounded-3 p-2 me-2" style="width: 36px; height: 36px;">
                     <i class="bi bi-activity"></i>
                 </span>
-                <span>SitePulse <span class="badge bg-primary-subtle text-primary ms-1 fs-8 fw-semibold" style="font-size: 0.65rem;">AGENCY</span></span>
+                <span>SitePulse</span>
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -172,6 +172,11 @@
                             <i class="bi bi-plus-circle me-1"></i> Add Website
                         </a>
                     </li>
+                    <!-- <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('guide') ? 'active fw-semibold' : '' }}" href="{{ route('guide') }}">
+                            <i class="bi bi-book me-1"></i> Guide
+                        </a>
+                    </li> -->
                 </ul>
 
                 <div class="d-flex align-items-center gap-2">
@@ -235,12 +240,18 @@
 
     <!-- Footer -->
     <footer class="bg-white border-top py-3 mt-auto">
-        <div class="container-fluid px-lg-5 d-flex flex-wrap justify-content-between align-items-center text-muted small">
-            <div>
-                <span class="fw-semibold text-dark">Site Pulse Monitor</span> &copy; {{ date('Y') }} &bull; Web Agency Uptime, SSL & Domain Expiry Guardian
+        <div class="container-fluid px-lg-5 d-flex flex-wrap justify-content-between align-items-center text-muted small gap-2">
+            <div class="d-flex flex-wrap align-items-center gap-2 gap-md-3">
+                <span><span class="fw-semibold text-dark">Site Pulse Monitor</span> &copy; {{ date('Y') }} &bull; Website Uptime, SSL & Domain Expiry Guardian</span>
+                <span class="text-secondary d-none d-md-inline">&bull;</span>
+                <a href="{{ route('guide') }}" class="text-decoration-none fw-semibold text-primary d-inline-flex align-items-center">
+                    <i class="bi bi-question-circle me-1"></i> User Guide & Documentation
+                </a>
             </div>
             <div>
-                <span class="badge bg-light text-secondary border">Anti-Cache Live Engine</span>
+                <a href="https://github.com/AyodhyaSankalpa/Site-Monitoring-System" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-muted d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-github text-dark fs-6"></i>
+                </a>
             </div>
         </div>
     </footer>

@@ -20,3 +20,6 @@ Route::prefix('sites')->name('sites.')->group(function () {
     Route::delete('/{site}', [SiteController::class, 'destroy'])->name('destroy');
     Route::post('/{site}/check', [SiteController::class, 'check'])->name('check');
 });
+
+// User Guide / Documentation Route
+Route::view('/guide', 'guide')->name('guide');

@@ -17,7 +17,7 @@ class SiteController extends Controller
     ) {}
 
     /**
-     * Display a listing of sites and agency stats.
+     * Display a listing of sites and system stats.
      */
     public function index(Request $request): View
     {
