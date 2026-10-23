@@ -67,9 +67,6 @@ class SiteCheckerService
      */
     public function checkUptime(string $url): array
     {
-        $startTime = microtime(true);
-        $ch = curl_init();
-
         // Ensure URL has protocol
         if (! preg_match('#^https?://#i', $url)) {
             $url = 'https://' . $url;
@@ -78,31 +75,59 @@ class SiteCheckerService
         // Add a random timestamp param to query string to break upstream edge proxy caches
         $cacheBusterUrl = $url . (str_contains($url, '?') ? '&' : '?') . '_nocache=' . microtime(true);
 
+        $result = $this->executeCurlProbe($cacheBusterUrl);
+
+        // If failed with unexpected EOF or connection error, retry once with fallback mode
+        if (! $result['is_online'] && ! empty($result['error']) && str_contains(strtolower($result['error']), 'unexpected eof')) {
+            $fallbackResult = $this->executeCurlProbe($cacheBusterUrl, true);
+            if ($fallbackResult['is_online']) {
+                $result = $fallbackResult;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Internal cURL probe executor with OpenSSL 3.0 resilience.
+     */
+    private function executeCurlProbe(string $url, bool $fallbackMode = false): array
+    {
+        $startTime = microtime(true);
+        $ch = curl_init();
+
+        $headers = [
+            'Cache-Control: no-cache, no-store, must-revalidate',
+            'Pragma: no-cache',
+            'Expires: 0',
+            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language: en-US,en;q=0.9',
+        ];
+
         curl_setopt_array($ch, [
-            CURLOPT_URL => $cacheBusterUrl,
+            CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_NOBODY => false,
             CURLOPT_TIMEOUT => 15,
-            CURLOPT_CONNECTTIMEOUT => 7,
+            CURLOPT_CONNECTTIMEOUT => 8,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => 0,
-            CURLOPT_USERAGENT => 'SitePulseMonitor/1.0 (+https://example.com)',
-            CURLOPT_HTTPHEADER => [
-                'Cache-Control: no-cache, no-store, must-revalidate',
-                'Pragma: no-cache',
-                'Expires: 0',
-                'Accept: */*',
-            ],
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_ENCODING => '', // Automatically negotiate gzip/deflate/br
+            CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 (compatible; SitePulse/1.0)',
+            CURLOPT_HTTPHEADER => $headers,
         ]);
 
-        // Only fetch the first 1KB of content to save bandwidth and compute
-        curl_setopt($ch, CURLOPT_RANGE, '0-1024');
+        if ($fallbackMode) {
+            // In fallback mode, issue a HEAD request to avoid body read socket termination
+            curl_setopt($ch, CURLOPT_NOBODY, true);
+        }
 
         $response = curl_exec($ch);
         $totalTime = curl_getinfo($ch, CURLINFO_TOTAL_TIME);
-        $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $statusCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $primaryIp = curl_getinfo($ch, CURLINFO_PRIMARY_IP);
         $curlError = curl_error($ch);
         curl_close($ch);
@@ -112,9 +137,16 @@ class SiteCheckerService
         // A site is considered UP if status is 2xx, 3xx, or auth required (401/403)
         $isOnline = ($statusCode >= 200 && $statusCode < 400) || in_array($statusCode, [401, 403]);
 
-        // If cURL failed with DNS or connection failure
+        // If cURL returned an error or status is 0
         if ($statusCode === 0 || ! empty($curlError)) {
-            $isOnline = false;
+            // Check if OpenSSL 3.0 reported unexpected EOF but server actually responded with valid HTTP code
+            $isUnexpectedEof = ! empty($curlError) && str_contains(strtolower($curlError), 'unexpected eof');
+            if ($isUnexpectedEof && $statusCode >= 200 && $statusCode < 500) {
+                $isOnline = true;
+                $curlError = null;
+            } else {
+                $isOnline = false;
+            }
         }
 
         return [

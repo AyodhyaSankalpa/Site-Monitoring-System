@@ -6,6 +6,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Site Pulse Monitor') - Site Monitoring System</title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="alternate icon" href="{{ asset('favicon.ico') }}">
+
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -240,18 +244,20 @@
 
     <!-- Footer -->
     <footer class="bg-white border-top py-3 mt-auto">
-        <div class="container-fluid px-lg-5 d-flex flex-wrap justify-content-between align-items-center text-muted small gap-2">
-            <div class="d-flex flex-wrap align-items-center gap-2 gap-md-3">
-                <span><span class="fw-semibold text-dark">Site Pulse Monitor</span> &copy; {{ date('Y') }} &bull; Website Uptime, SSL & Domain Expiry Guardian</span>
-                <span class="text-secondary d-none d-md-inline">&bull;</span>
-                <a href="{{ route('guide') }}" class="text-decoration-none fw-semibold text-primary d-inline-flex align-items-center">
-                    <i class="bi bi-question-circle me-1"></i> User Guide & Documentation
-                </a>
-            </div>
-            <div>
-                <a href="https://github.com/AyodhyaSankalpa/Site-Monitoring-System" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-muted d-inline-flex align-items-center gap-2">
-                    <i class="bi bi-github text-dark fs-6"></i>
-                </a>
+        <div class="container-fluid px-lg-5">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center text-center text-md-start gap-2 gap-md-0 small text-muted">
+                <div class="d-flex flex-wrap justify-content-center justify-content-md-start align-items-center gap-2 gap-sm-3">
+                    <span class="fw-semibold text-dark">&copy; {{ date('Y') }} Site Pulse Monitor</span>
+                    <span class="text-secondary opacity-50 d-none d-sm-inline">&bull;</span>
+                    <a href="{{ route('guide') }}" class="text-decoration-none fw-medium text-secondary link-primary d-inline-flex align-items-center">
+                        <i class="bi bi-question-circle me-1 text-primary"></i> User Guide &amp; Documentation
+                    </a>
+                </div>
+                <div class="d-flex align-items-center justify-content-center gap-3">
+                    <a href="https://github.com/AyodhyaSankalpa/Site-Monitoring-System" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-dark link-secondary d-inline-flex align-items-center p-1" title="View Repository on GitHub">
+                        <i class="bi bi-github fs-5"></i>
+                    </a>
+                </div>
             </div>
         </div>
     </footer>
