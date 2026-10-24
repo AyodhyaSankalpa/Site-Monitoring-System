@@ -83,8 +83,8 @@ SitePulse executes all probes server-to-server:
 
 ## 💻 Tech Stack
 
-* **Framework:** [Laravel 12.x](https://laravel.com)
-* **Backend Language:** PHP 8.2+ / PHP 8.4
+* **Framework:** [Laravel 13.x](https://laravel.com)
+* **Backend Language:** PHP 8.3+ / PHP 8.4
 * **Database:** MySQL / MariaDB (via Eloquent ORM)
 * **Frontend:** Laravel Blade, [Bootstrap 5.3.3](https://getbootstrap.com), [Bootstrap Icons 1.11.3](https://icons.getbootstrap.com)
 * **Networking / Security:** cURL, OpenSSL Extension, RDAP Client
@@ -95,7 +95,7 @@ SitePulse executes all probes server-to-server:
 
 ### 1. Prerequisites
 Ensure you have the following installed on your machine or server:
-* PHP >= 8.2 with `curl`, `openssl`, `pdo_mysql`, `mbstring`, and `json` extensions.
+* PHP >= 8.3 with `curl`, `openssl`, `pdo_mysql`, `mbstring`, and `json` extensions.
 * Composer
 * MySQL or MariaDB
 
