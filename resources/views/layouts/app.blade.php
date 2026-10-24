@@ -190,9 +190,6 @@
                             <i class="bi bi-arrow-repeat me-1"></i> Check All Sites
                         </button>
                     </form>
-                    <a href="{{ route('sites.create') }}" class="btn btn-primary btn-sm px-3 shadow-sm">
-                        <i class="bi bi-plus-lg me-1"></i> Add New Site
-                    </a>
                 </div>
             </div>
         </div>

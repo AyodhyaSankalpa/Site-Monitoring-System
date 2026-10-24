@@ -1,13 +1,23 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "ayodhyasankalpa/site-monitoring-system",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Self-hosted website uptime, SSL certificate, and domain/hosting expiration monitoring system with anti-cache server probing.",
     "keywords": [
         "laravel",
-        "framework"
+        "monitoring",
+        "uptime-monitor",
+        "ssl-monitor",
+        "domain-expiration",
+        "site-pulse"
     ],
     "license": "MIT",
+    "authors": [
+        {
+            "name": "Ayodhya Sankalpa",
+            "homepage": "https://github.com/AyodhyaSankalpa/Site-Monitoring-System"
+        }
+    ],
     "require": {
         "php": "^8.3",
         "laravel/framework": "^13.17",

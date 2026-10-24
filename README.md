@@ -1,58 +1,215 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<div align="center">
+
+# 🌐 SitePulse
+
+### Self-Hosted Website Uptime, SSL Certificate & Domain Expiration Monitoring System
+
+[![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.2%20|%208.4-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://php.net)
+[![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)](https://getbootstrap.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge)](LICENSE)
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  A clean, lightweight, and reliable monitoring dashboard designed to eliminate deceptive browser-cached checks by dispatching zero-cache HTTP probes, direct OpenSSL socket handshakes, and registrar expiration queries directly from your server.
 </p>
 
-## About Laravel
+[Key Features](#-key-features) •
+[Architecture](#-how-it-works-anti-cache-engine) •
+[Installation](#-installation--setup) •
+[CLI & Automation](#-cron--background-automation) •
+[Author](#-author--attribution)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+</div>
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 🚀 Key Features
 
-## Learning Laravel
+* **Anti-Cache Live Uptime Probing:**
+  * Bypasses client-side browser caches and intermediate CDN/proxy caches using strict zero-cache headers (`Cache-Control: no-cache, no-store, must-revalidate`, `Pragma: no-cache`) and dynamic timestamp query-busters.
+  * Measures round-trip server latency in milliseconds (`ms`).
+  * Enforces stable HTTP 1.1 protocol with automatic response compression (`gzip`, `deflate`, `br`) to conserve server bandwidth.
+  * Resilient against unannounced TLS socket closures with OpenSSL 3.0+ compatibility and automatic HEAD-request fallback.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+* **Live SSL Certificate Inspection:**
+  * Direct encrypted TLS socket inspection via port 443 (`stream_socket_client` and `openssl_x509_parse`).
+  * Extracts authoritative certificate attributes: **Issuer Name** (e.g., Let's Encrypt, Cloudflare, DigiCert) and exact **Expiration Timestamps**.
+  * Calculates real-time countdown days and displays intuitive health badges:
+    * `Valid` (More than 14 days remaining)
+    * `Expiring Soon` (14 days or less remaining)
+    * `Expired` (Certificate has lapsed)
+    * `Invalid SSL` (Handshake failure or hostname mismatch)
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+* **Domain & Hosting Renewal Tracking:**
+  * Records domain registrars, hosting providers, server IPs, and scheduled renewal deadlines.
+  * Authoritative RDAP lookup integration to query domain registry expiration dates.
+  * Dynamic remaining-days countdown badges: Safe (`> 30d`), Warning (`≤ 30d`), and Critical (`≤ 7d / Expired`).
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+* **Interactive Mini-Browser Live Previews:**
+  * Displays a compact, sandboxed mini-browser window frame (`220px × 145px`) with Mac-style controls directly inside dashboard table cells for quick visual site verification.
 
-## Agentic Development
+* **Diagnostic Details & Historical Logs:**
+  * Comprehensive single-site view (`/sites/{id}`) containing diagnostic cards, client information, and full inspection history logs (HTTP status codes, latency in ms, error traces, and timestamps).
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+* **On-Demand Single & Bulk Checks:**
+  * Trigger real-time AJAX single-site diagnostic checks without refreshing the page.
+  * "Check All Sites" bulk action for batch re-checking with visual progress feedback.
 
-```bash
-composer require laravel/boost --dev
+* **Interactive Filtering & Search:**
+  * Instantly filter registered websites by status (`All`, `Online`, `Down`, `SSL Alert`) or search by site name, client name, or URL.
 
-php artisan boost:install
+* **Built-in Documentation (`/guide`):**
+  * Integrated user documentation explaining website onboarding, status codes, anti-cache architecture, and server cron setup.
+
+---
+
+## 🛠️ How It Works: Anti-Cache Engine
+
+Traditional browser testing can deliver misleading results due to local browser caching, service workers, or ISP-level proxy nodes—often serving stale cached pages even when the origin web server is returning 5xx errors or down.
+
+SitePulse executes all probes server-to-server:
+
+```
+[SitePulse Server] ──( cURL + Zero-Cache Headers )──> [Origin Web Server]
+[SitePulse Server] ──( OpenSSL Socket Handshake )───> [Port 443 / Peer Cert]
+[SitePulse Server] ──( Authoritative RDAP Query )───> [Domain Registry]
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+1. **HTTP Uptime Probe:** Sends real-time requests with cache-busting headers to verify genuine HTTP response codes (200, 301, 302, 401, 403, 500, etc.).
+2. **OpenSSL Socket Stream:** Establishes a TLS stream client to parse the peer X.509 certificate directly, extracting live validity dates regardless of what the web application renders.
+3. **Registry Sync:** Queries RDAP registry servers to confirm official domain expiration dates.
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 💻 Tech Stack
 
-## Code of Conduct
+* **Framework:** [Laravel 12.x](https://laravel.com)
+* **Backend Language:** PHP 8.2+ / PHP 8.4
+* **Database:** MySQL / MariaDB (via Eloquent ORM)
+* **Frontend:** Laravel Blade, [Bootstrap 5.3.3](https://getbootstrap.com), [Bootstrap Icons 1.11.3](https://icons.getbootstrap.com)
+* **Networking / Security:** cURL, OpenSSL Extension, RDAP Client
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## 📦 Installation & Setup
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 1. Prerequisites
+Ensure you have the following installed on your machine or server:
+* PHP >= 8.2 with `curl`, `openssl`, `pdo_mysql`, `mbstring`, and `json` extensions.
+* Composer
+* MySQL or MariaDB
 
-## License
+### 2. Clone the Repository
+```bash
+git clone https://github.com/AyodhyaSankalpa/Site-Monitoring-System.git
+cd Site-Monitoring-System
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 3. Install Dependencies
+```bash
+composer install
+```
+
+### 4. Configure Environment
+Copy the example environment configuration:
+```bash
+cp .env.example .env
+```
+
+Generate your application key:
+```bash
+php artisan key:generate
+```
+
+Open `.env` and set your database connection details:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=site_monitoring_db
+DB_USERNAME=root
+DB_PASSWORD=your_password
+```
+
+### 5. Run Database Migrations
+Create the `sites` and `site_checks` tables:
+```bash
+php artisan migrate
+```
+
+### 6. Start the Development Server
+```bash
+php artisan serve
+```
+
+Visit `http://127.0.0.1:8000` in your browser.
+
+---
+
+## ⏰ Cron & Background Automation
+
+SitePulse includes a console command to inspect all active websites in batch:
+
+```bash
+php artisan sites:check
+```
+
+### Production Crontab Setup
+To automate monitoring checks every 15 minutes on a production Linux server (VPS, Ubuntu, cPanel):
+
+```bash
+crontab -e
+```
+
+Add the following cron expression (replace `/path/to/project` with your absolute project path):
+
+```cron
+*/15 * * * * cd /path/to/project && php artisan sites:check >> /dev/null 2>&1
+```
+
+---
+
+## 📂 Project Structure Overview
+
+```
+Site-Monitoring-System/
+├── app/
+│   ├── Console/Commands/
+│   │   └── CheckSitesCommand.php       # CLI command: php artisan sites:check
+│   ├── Http/Controllers/
+│   │   └── SiteController.php          # CRUD, filtering, single & bulk checks
+│   ├── Models/
+│   │   ├── Site.php                    # Site entity with expiry countdown helpers
+│   │   └── SiteCheck.php               # Historical inspection logs
+│   └── Services/
+│       └── SiteCheckerService.php      # cURL anti-cache probe, OpenSSL socket & RDAP
+├── database/migrations/
+│   ├── 2026_10_15_000001_create_sites_table.php
+│   └── 2026_10_15_000002_create_site_checks_table.php
+├── resources/views/
+│   ├── layouts/
+│   │   └── app.blade.php               # Layout with SVG favicon, responsive footer & navbar
+│   ├── sites/
+│   │   ├── index.blade.php             # Dashboard with stats, filters, mini-browser previews
+│   │   ├── create.blade.php            # Register new site form
+│   │   ├── edit.blade.php              # Edit site & renewal info
+│   │   └── show.blade.php              # Diagnostic view & historical logs table
+│   └── guide.blade.php                 # In-app user documentation & status manual
+└── routes/
+    └── web.php                         # Resource routes, monitoring actions & guide
+```
+
+---
+
+## 👨‍💻 Author & Attribution
+
+* **Developer:** [Ayodhya Sankalpa](https://github.com/AyodhyaSankalpa)
+* **GitHub Repository:** [Site-Monitoring-System](https://github.com/AyodhyaSankalpa/Site-Monitoring-System)
+
+If you find this project useful, feel free to **star ⭐ the repository**!
+
+---
+
+## 📄 License
+
+This project is open-source software licensed under the [MIT License](LICENSE).
